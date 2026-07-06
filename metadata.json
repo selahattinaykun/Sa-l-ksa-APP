@@ -1,0 +1,6 @@
+{
+  "name": "Sağlıksa App",
+  "description": "Health and medication tracker with reminders, map of nearby healthcare, and emergency SMS.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
