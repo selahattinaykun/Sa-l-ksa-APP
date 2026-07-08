@@ -157,19 +157,15 @@ object UpdateManager {
                             throw Exception("İndirilen dosya çok küçük (${fileSize} bayt) ve geçerli bir APK değil.")
                         }
                     } else {
-                        // Zip/APK imzasını kontrol et (PK\u0003\u0004)
-                        java.io.FileInputStream(apkFile).use { fis ->
-                            val header = ByteArray(4)
-                            val readBytes = fis.read(header)
-                            if (readBytes == 4) {
-                                val isZip = header[0] == 0x50.toByte() && header[1] == 0x4B.toByte() &&
-                                            header[2] == 0x03.toByte() && header[3] == 0x04.toByte()
-                                if (!isZip) {
-                                    throw Exception("İndirilen dosya geçerli bir Android paketi (APK) değil. Dosya formatı bozuk veya imza hatalı.")
-                                }
-                            } else {
-                                throw Exception("Dosya başlığı okunamadı.")
+                        // Zip/APK bütünlüğünü java.util.zip.ZipFile ile kontrol et
+                        try {
+                            java.util.zip.ZipFile(apkFile).use { 
+                                // Geçerli bir zip dosyası, devam edilebilir.
                             }
+                        } catch (e: java.util.zip.ZipException) {
+                            throw Exception("İndirilen dosya geçerli bir Android paketi (APK) değil veya eksik inmiş. Lütfen GitHub deponuzdaki APK'nın bozuk olmadığından emin olun.")
+                        } catch (e: Exception) {
+                            throw Exception("İndirilen dosya doğrulanamadı: ${e.localizedMessage}")
                         }
                     }
                 } else {
@@ -206,6 +202,7 @@ object UpdateManager {
 
         val intent = Intent(Intent.ACTION_VIEW).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             val uri = androidx.core.content.FileProvider.getUriForFile(
                 context,
