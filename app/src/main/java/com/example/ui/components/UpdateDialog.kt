@@ -16,6 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.util.UpdateManager
 import com.example.util.UpdateState
 
@@ -24,6 +27,26 @@ fun UpdateDialog() {
     val context = LocalContext.current
     val updateState by UpdateManager.updateState.collectAsState()
     val info = UpdateManager.updateInfo
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val currentState = updateState
+                if (currentState is UpdateState.PermissionRequired) {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        if (context.packageManager.canRequestPackageInstalls()) {
+                            UpdateManager.installApk(context, currentState.apkFile)
+                        }
+                    }
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     if (UpdateManager.showDialog && info != null) {
         Dialog(
@@ -173,6 +196,55 @@ fun UpdateDialog() {
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
                                         Text("GitHub'ı Aç")
+                                    }
+                                }
+                            }
+                        }
+                        is UpdateState.PermissionRequired -> {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Text(
+                                    text = "Uygulamanın güncellenebilmesi için bilinmeyen kaynaklardan yükleme yapılmasına izin vermelisiniz. Lütfen yönlendirilen ekrandan izin verip geri dönün.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    OutlinedButton(
+                                        onClick = {
+                                            UpdateManager.showDialog = false
+                                            UpdateManager.resetState()
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text("İptal")
+                                    }
+                                    Button(
+                                        onClick = {
+                                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                                try {
+                                                    val settingsIntent = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                                                        data = Uri.parse("package:${context.packageName}")
+                                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                    }
+                                                    context.startActivity(settingsIntent)
+                                                } catch (e: Exception) {
+                                                    e.printStackTrace()
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1.5f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text("İzin Ayarlarını Aç")
                                     }
                                 }
                             }
