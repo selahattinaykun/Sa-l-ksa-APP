@@ -123,6 +123,9 @@ object UpdateManager {
                 // güvenlik kısıtlamaları nedeniyle dosyayı okuyamaz ve "Paket ayıklama hatası" (Package parsing error) verir.
                 val storageDir = context.getExternalFilesDir(null) ?: context.cacheDir
                 val apkFile = File(storageDir, "update_v2.apk")
+                if (apkFile.exists()) {
+                    apkFile.delete()
+                }
                 
                 body.byteStream().use { input ->
                     FileOutputStream(apkFile).use { output ->
@@ -210,6 +213,27 @@ object UpdateManager {
                 file
             )
             setDataAndType(uri, "application/vnd.android.package-archive")
+            // Explicitly set ClipData to ensure permissions are granted on Android 5.0+ / 10+
+            clipData = android.content.ClipData.newRawUri("", uri)
+        }
+
+        // Explicitly grant URI read permission to all apps that can handle this intent (e.g. Package Installer)
+        try {
+            val uri = androidx.core.content.FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+            val resInfoList = context.packageManager.queryIntentActivities(
+                intent,
+                android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+            )
+            for (resolveInfo in resInfoList) {
+                val packageName = resolveInfo.activityInfo.packageName
+                context.grantUriPermission(packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
         try {
