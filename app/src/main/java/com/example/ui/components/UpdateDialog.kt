@@ -1,5 +1,7 @@
 package com.example.ui.components
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -129,6 +131,50 @@ fun UpdateDialog() {
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold
                                 )
+                            }
+                        }
+                        is UpdateState.Error -> {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Text(
+                                    text = state.message,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.error,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    OutlinedButton(
+                                        onClick = {
+                                            UpdateManager.showDialog = false
+                                            UpdateManager.resetState()
+                                        },
+                                        modifier = Modifier.weight(1.5f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text("Kapat")
+                                    }
+                                    Button(
+                                        onClick = {
+                                            try {
+                                                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/selahattinaykun/Sa-l-ksa-APP/releases"))
+                                                context.startActivity(browserIntent)
+                                            } catch (e: Exception) {
+                                                e.printStackTrace()
+                                            }
+                                        },
+                                        modifier = Modifier.weight(2f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text("GitHub'ı Aç")
+                                    }
+                                }
                             }
                         }
                         else -> {

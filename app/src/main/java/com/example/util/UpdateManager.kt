@@ -40,6 +40,10 @@ object UpdateManager {
 
     private const val SIMULATE_UPDATE_BY_DEFAULT = true
 
+    fun resetState() {
+        _updateState.value = UpdateState.Idle
+    }
+
     fun checkUpdate(context: Context, isManualCheck: Boolean = false) {
         val currentVersionCode = BuildConfig.VERSION_CODE
         val currentVersionName = BuildConfig.VERSION_NAME
@@ -52,7 +56,7 @@ object UpdateManager {
                 val simulatedUpdate = UpdateInfo(
                     versionCode = currentVersionCode + 1,
                     versionName = "2.0.0",
-                    updateUrl = "https://raw.githubusercontent.com/appium/io.appium.settings/master/apks/settings_apk-debug.apk", // Safe tiny demo APK
+                    updateUrl = "https://github.com/selahattinaykun/Sa-l-ksa-APP/releases/download/v2.0.0/app-debug.apk", // User repository release asset
                     releaseNotes = "• Yepyeni ilaç alarmları ve sesli uyarı özelliği eklendi.\n• Boy, kilo ve cinsiyete göre ideal kilo hesaplayıcı entegre edildi.\n• İlaç saati girişlerindeki biçimlendirme hataları düzeltildi.\n• Performans iyileştirmeleri ve hata gidermeleri yapıldı.",
                     isForceUpdate = false
                 )
@@ -76,7 +80,7 @@ object UpdateManager {
                         val simulatedUpdate = UpdateInfo(
                             versionCode = currentVersionCode + 1,
                             versionName = "2.0.0",
-                            updateUrl = "https://raw.githubusercontent.com/appium/io.appium.settings/master/apks/settings_apk-debug.apk",
+                            updateUrl = "https://github.com/selahattinaykun/Sa-l-ksa-APP/releases/download/v2.0.0/app-debug.apk",
                             releaseNotes = "• Yepyeni ilaç alarmları ve sesli uyarı özelliği eklendi.\n• Boy, kilo ve cinsiyete göre ideal kilo hesaplayıcı entegre edildi.\n• İlaç saati girişlerindeki biçimlendirme hataları düzeltildi.\n• Performans iyileştirmeleri ve hata gidermeleri yapıldı.",
                             isForceUpdate = false
                         )
@@ -104,7 +108,11 @@ object UpdateManager {
                 val response = client.newCall(request).execute()
                 
                 if (!response.isSuccessful) {
-                    throw Exception("İndirme hatası: HTTP ${response.code}")
+                    if (response.code == 404) {
+                        throw Exception("Güncelleme dosyası bulunamadı (HTTP 404).\nLütfen GitHub deponuzda 'v2.0.0' etiketli bir Sürüm (Release) oluşturduğunuzdan ve bu sürüme 'app-debug.apk' dosyasını yüklediğinizden emin olun.")
+                    } else {
+                        throw Exception("İndirme hatası: HTTP ${response.code}")
+                    }
                 }
                 
                 val body = response.body ?: throw Exception("Boş dosya indirildi")
