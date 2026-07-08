@@ -52,7 +52,7 @@ object UpdateManager {
                 val simulatedUpdate = UpdateInfo(
                     versionCode = currentVersionCode + 1,
                     versionName = "2.0.0",
-                    updateUrl = "https://github.com/appium/io.appium.settings/releases/download/v5.6.4/settings_apk-debug.apk", // Safe tiny demo APK
+                    updateUrl = "https://raw.githubusercontent.com/appium/io.appium.settings/master/apks/settings_apk-debug.apk", // Safe tiny demo APK
                     releaseNotes = "• Yepyeni ilaç alarmları ve sesli uyarı özelliği eklendi.\n• Boy, kilo ve cinsiyete göre ideal kilo hesaplayıcı entegre edildi.\n• İlaç saati girişlerindeki biçimlendirme hataları düzeltildi.\n• Performans iyileştirmeleri ve hata gidermeleri yapıldı.",
                     isForceUpdate = false
                 )
@@ -76,7 +76,7 @@ object UpdateManager {
                         val simulatedUpdate = UpdateInfo(
                             versionCode = currentVersionCode + 1,
                             versionName = "2.0.0",
-                            updateUrl = "https://github.com/appium/io.appium.settings/releases/download/v5.6.4/settings_apk-debug.apk",
+                            updateUrl = "https://raw.githubusercontent.com/appium/io.appium.settings/master/apks/settings_apk-debug.apk",
                             releaseNotes = "• Yepyeni ilaç alarmları ve sesli uyarı özelliği eklendi.\n• Boy, kilo ve cinsiyete göre ideal kilo hesaplayıcı entegre edildi.\n• İlaç saati girişlerindeki biçimlendirme hataları düzeltildi.\n• Performans iyileştirmeleri ve hata gidermeleri yapıldı.",
                             isForceUpdate = false
                         )
