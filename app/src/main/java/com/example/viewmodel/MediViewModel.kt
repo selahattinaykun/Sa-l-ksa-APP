@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.AppRepository
 import com.example.data.Medication
 import com.example.data.MedicationLog
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -29,7 +31,10 @@ class MediViewModel(private val repository: AppRepository) : ViewModel() {
         initialValue = emptyList()
     )
 
-    val todayLogs = repository.getLogsByDate(dateFormat.format(Date())).stateIn(
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val todayLogs = _currentDate.flatMapLatest { date ->
+        repository.getLogsByDate(date)
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
@@ -52,15 +57,16 @@ class MediViewModel(private val repository: AppRepository) : ViewModel() {
         initialValue = emptyList()
     )
 
-    fun addMedication(name: String, dosage: String, time: String) {
+    fun addMedication(name: String, dosage: String, time: String, notificationsEnabled: Boolean, alarmsEnabled: Boolean, onAdded: (Int) -> Unit) {
         viewModelScope.launch {
-            repository.insertMedication(Medication(name = name, dosage = dosage, time = time))
+            val id = repository.insertMedication(Medication(name = name, dosage = dosage, time = time, notificationsEnabled = notificationsEnabled, alarmsEnabled = alarmsEnabled))
+            onAdded(id.toInt())
         }
     }
 
-    fun updateMedication(id: Int, name: String, dosage: String, time: String) {
+    fun updateMedication(id: Int, name: String, dosage: String, time: String, notificationsEnabled: Boolean, alarmsEnabled: Boolean) {
         viewModelScope.launch {
-            repository.insertMedication(Medication(id = id, name = name, dosage = dosage, time = time))
+            repository.insertMedication(Medication(id = id, name = name, dosage = dosage, time = time, notificationsEnabled = notificationsEnabled, alarmsEnabled = alarmsEnabled))
         }
     }
 
@@ -74,6 +80,16 @@ class MediViewModel(private val repository: AppRepository) : ViewModel() {
         viewModelScope.launch {
             repository.toggleLogStatus(medId, _currentDate.value, isTaken)
         }
+    }
+
+    fun deleteMedicationLog(medId: Int) {
+        viewModelScope.launch {
+            repository.deleteLog(medId, _currentDate.value)
+        }
+    }
+
+    fun setCurrentDate(date: String) {
+        _currentDate.value = date
     }
 }
 

@@ -44,7 +44,7 @@ class ChatViewModel : ViewModel() {
                     contents = contents,
                     systemInstruction = Content(
                         role = "system",
-                        parts = listOf(Part(text = "Sen bir sağlık asistanısın. Adın 'Geminal'. Kullanıcının 'Neyim var?' veya benzeri sağlık şikayetleri ile ilgili sorularına, nazikçe, anlaşılır ve empatik bir dille cevap ver. Tıbbi tavsiye vermek yerine, olası durumlar hakkında bilgi ver ve her zaman bir doktora görünmeleri gerektiğini hatırlat."))
+                        parts = listOf(Part(text = "Sen bir sağlık asistanısın. Kullanıcının 'Neyim var?' veya benzeri sağlık şikayetleri ile ilgili sorularına, nazikçe, anlaşılır ve empatik bir dille cevap ver. Tıbbi tavsiye vermek yerine, olası durumlar hakkında bilgi ver ve her zaman bir doktora görünmeleri gerektiğini hatırlat."))
                     )
                 )
 

@@ -11,8 +11,11 @@ interface MedicationDao {
     @Query("SELECT * FROM medications ORDER BY time ASC")
     fun getAllMedications(): Flow<List<Medication>>
 
+    @Query("SELECT * FROM medications ORDER BY time ASC")
+    suspend fun getAllMedicationsList(): List<Medication>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMedication(medication: Medication)
+    suspend fun insertMedication(medication: Medication): Long
 
     @Query("DELETE FROM medications WHERE id = :id")
     suspend fun deleteMedicationById(id: Int)
@@ -37,4 +40,7 @@ interface MedicationLogDao {
 
     @Query("SELECT * FROM medication_logs WHERE medicationId = :medId AND date = :date LIMIT 1")
     suspend fun getLog(medId: Int, date: String): MedicationLog?
+
+    @Query("DELETE FROM medication_logs WHERE medicationId = :medId AND date = :date")
+    suspend fun deleteLog(medId: Int, date: String)
 }

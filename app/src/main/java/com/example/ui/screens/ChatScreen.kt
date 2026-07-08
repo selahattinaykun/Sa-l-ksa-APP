@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,7 +24,11 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
+fun ChatScreen(
+    isDarkTheme: Boolean,
+    onThemeToggle: () -> Unit,
+    viewModel: ChatViewModel = viewModel()
+) {
     val messages by viewModel.messages.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     var inputText by remember { mutableStateOf("") }
@@ -32,11 +38,19 @@ fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Geminal Sağlık Asistanı") },
+                title = { Text("Sağlık Asistanı") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                ),
+                actions = {
+                    IconButton(onClick = onThemeToggle) {
+                        Icon(
+                            imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = if (isDarkTheme) "Açık Tema" else "Koyu Tema"
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
@@ -58,7 +72,7 @@ fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
                     item {
                         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                             Text(
-                                "Merhaba! Ben Geminal. Size nasıl yardımcı olabilirim? Şikayetiniz nedir?",
+                                "Merhaba! Ben Sağlık Asistanınız. Size nasıl yardımcı olabilirim? Şikayetiniz nedir?",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 style = MaterialTheme.typography.bodyLarge
                             )
@@ -142,7 +156,7 @@ fun ChatBubble(message: ChatMessage) {
                 .padding(12.dp)
         ) {
             Text(
-                text = if (isUser) "Siz" else "Geminal",
+                text = if (isUser) "Siz" else "Sağlık Asistanı",
                 fontWeight = FontWeight.Bold,
                 color = contentColor,
                 style = MaterialTheme.typography.labelMedium
